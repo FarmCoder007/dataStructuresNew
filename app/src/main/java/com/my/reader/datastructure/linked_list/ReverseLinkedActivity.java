@@ -25,6 +25,7 @@ public class ReverseLinkedActivity extends AppCompatActivity implements View.OnC
         findViewById(R.id.tv_one).setOnClickListener(this);
         findViewById(R.id.tv_two).setOnClickListener(this);
         findViewById(R.id.tv_three).setOnClickListener(this);
+        findViewById(R.id.tv_four).setOnClickListener(this);
     }
 
     @Override
@@ -37,12 +38,16 @@ public class ReverseLinkedActivity extends AppCompatActivity implements View.OnC
             case R.id.tv_two:
                 // 计算两个链表之和
                 Node addResult = addTwoNumbers(buildNode(arr), buildNode(arr2));
-                showNode(addResult);
+                showNode("两链表之和结果:", addResult);
                 break;
             case R.id.tv_three:
 //                Node swapNode = swapPairs(buildNode(arr));
-                Node swapNode = swapPairsTwo(buildNode(arr));
-                showNode(swapNode);
+                Node swapNode = swapPairsTwo(buildNode(arr3));
+                showNode("相邻节点交换结果:", swapNode);
+                break;
+            case R.id.tv_four:
+//                showNode("删除倒数N节点结果:", deleteNodeOfIndex(6, buildNode(arr3)));
+                showNode("删除倒数N节点结果:", deleteNodeOfIndex_Two(buildNode(arr3), 5));
                 break;
             default:
                 break;
@@ -69,6 +74,7 @@ public class ReverseLinkedActivity extends AppCompatActivity implements View.OnC
      */
     int[] arr = {2, 5, 3, 4, 1, 0};
     int[] arr2 = {2, 1, 2, 3, 0, 7};
+    int[] arr3 = {1, 2, 3, 4, 5, 6};
 
     /**
      * 构建链表
@@ -95,9 +101,9 @@ public class ReverseLinkedActivity extends AppCompatActivity implements View.OnC
      *
      * @param currNode
      */
-    public void showNode(Node currNode) {
+    public void showNode(String log, Node currNode) {
         while (currNode != null) {
-            Log.e(TAG, "翻转前reverseList:p " + currNode.data);
+            Log.e(TAG, log + currNode.data);
             currNode = currNode.next;
         }
     }
@@ -105,11 +111,11 @@ public class ReverseLinkedActivity extends AppCompatActivity implements View.OnC
     /**
      * 翻转指定列表
      */
-    public void reverseList(Node header) {
+    public Node reverseList(Node header) {
         //header 为第一个节点  作为链表头 并且该节点的数据为数组的第一个元素
         Node currNode = header;
         // 输出链表
-        showNode(currNode);
+        showNode("翻转前的链表：", currNode);
         //链表反转时，需要用到上一个节点preNode 和下一个节点nextNode。
         //当前节点currNode重新指向currNode的上一个节点之前，需要先记录下currNode的下一个节点。因为currNode.next改变后，
         //你已经无法通过currNode.next获得下一个节点。
@@ -133,8 +139,8 @@ public class ReverseLinkedActivity extends AppCompatActivity implements View.OnC
         // currentnext  为null跳出循环  则只翻转 currNode 即可                                 currNode为0  剩一位0  没有next  将
         currNode.next = preNode;
         //输出反转链表
-        Log.e(TAG, "翻转后:");
-        showNode(currNode);
+        showNode("翻转后:", currNode);
+        return currNode;
     }
 
     /**
@@ -153,8 +159,7 @@ public class ReverseLinkedActivity extends AppCompatActivity implements View.OnC
         }
         Log.e(TAG, "开始第一次翻转\n" + "nextNode.data:" + nextNode.data + "" + "nextNode.next()" + nextNode.next + "\n" + "---pre:" + preNode.data + "--pre.next：" +
                 preNode.next + "\n" + "--currNode.data:" + currNode.data + "---currNode.next:" + currNode.next);
-        Log.e(TAG, "开始第一次翻转\n");
-        showNode(head);
+        showNode("开始第一次翻转:", head);
     }
 
 
@@ -239,26 +244,123 @@ public class ReverseLinkedActivity extends AppCompatActivity implements View.OnC
     }
 
     /**
-     *  方法二
+     * 方法二   迭代     1->2->3->4
+     * // pre   fir    sec
+     * // -1 --> 1 --> 2 -->3 -->4 --> 5
+     * // 交互一次
+     * // pre   sec    fir
+     * // -1 --> 2 --> 1 -->3 -->4 --> 5    // 向后移动pre  执行下次交换
+     * //             pre   head
+     * // -1 --> 2 --> 1 -->3 -->4 --> 5
+     *
      * @param head
      * @return
      */
     public Node swapPairsTwo(Node head) {
+        // 构建虚假链表头     等交换完 返回dummy.next
         Node dummy = new Node(-1);
-        dummy.next = head;
-        Node prevNode = dummy;
+        dummy.next = head;  // 1
+        Node prevNode = dummy;  // 中间变量  交换后改变虚假表头的指向
         while (head != null && head.next != null) {
-            Node firstNode = head;
-            Node secondNode = head.next;
-            // 交换
-            prevNode.next = secondNode;
-            firstNode.next = secondNode.next;
-            secondNode.next = firstNode;
+            Node firstNode = head; // 1
+            Node secondNode = head.next; // 2
+            // 交换 位置
+            prevNode.next = secondNode;  // -1->2
+            firstNode.next = secondNode.next; // 1 - > 3
+            secondNode.next = firstNode; // 2->1
 
             // 重置 prevNode  和head
             prevNode = firstNode;
             head = firstNode.next;
         }
+        return dummy.next;
+    }
+
+
+    /**
+     * 19 LeetCode 删除链表 倒数第N 个节点  例如 1->2->3->4->5  和 n=2  删除倒数第二个节点后 为   1->2->3->5
+     * <p>
+     * 自己翻转  删除   时间复杂度高   3次遍历链表
+     */
+    private Node deleteNodeOfIndex(int n, Node node) {
+        // 翻转 链表
+        Node reverseHeader = reverseList(node);
+        // 循环遍历节点
+        Node currNode = reverseHeader;
+        // 构建虚假链表头 【简化极端情况  比如只有一个节点   或者 删除第一个节点】
+        Node resultNode = new Node(-1);
+        resultNode.next = reverseHeader;
+        Node pre = null;
+        int i = 0;
+        while (currNode != null) {
+            i++;
+            if (i == n) {
+                if (i == 1) {
+                    resultNode.next = currNode.next;
+                } else {
+                    // 执行删除
+                    pre.next = currNode.next;
+                }
+                return reverseList(resultNode.next);
+            }
+            pre = currNode;
+            currNode = currNode.next;
+        }
+        return reverseList(reverseHeader);
+    }
+
+    /**
+     * 两次遍历题解
+     * 1  先计算 链表长度 L   2  找到第 L - n +1 个元素删除即可
+     *
+     * @return
+     */
+    private Node deleteNodeOfIndex_Two(Node head, int n) {
+        // 构建虚假链表头
+        Node deummy = new Node(-1);
+        deummy.next = head;
+        int length = 0;
+        Node first = head;
+        // 计算链表长度
+        while (first != null) {
+            length++;
+            first = first.next;
+        }
+        //  从头遍历   找到L - n 个元素 删除 其后一个元素
+        length -= n;
+        first = deummy;
+        while (length > 0) {
+            length--;
+            first = first.next;
+        }
+        // 删除第L-n-1个节点
+        first.next = first.next.next;
+        return deummy.next;
+    }
+
+    /**
+     * 一次遍历
+     * 1  先计算 链表长度 L   2  找到第 L - n +1 个元素删除即可
+     *
+     * @return
+     */
+    public Node deleteNodeOfIndex_Three(Node head, int n) {
+        // 定义虚假表头
+        Node dummy = new Node(0);
+        dummy.next = head;
+        // 定义 双节点
+        Node first = dummy;
+        Node second = dummy;
+        //  待删除的节点为  L - n +1   先定义 first节点 先走总数里的n的位置
+        //  那么 first 走到 最后的长度即为 L - N +1
+        for (int i = 0; i < n + 1; i++) {
+            first = first.next;
+        }
+        while (first != null) {
+            first = first.next;
+            second = second.next;
+        }
+        second.next = second.next.next;
         return dummy.next;
     }
 }
