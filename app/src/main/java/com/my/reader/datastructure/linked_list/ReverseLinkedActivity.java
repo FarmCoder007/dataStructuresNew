@@ -1,12 +1,12 @@
 package com.my.reader.datastructure.linked_list;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 
 import com.my.reader.datastructure.R;
+
+import androidx.appcompat.app.AppCompatActivity;
 
 /**
  * 翻转链表
@@ -26,6 +26,7 @@ public class ReverseLinkedActivity extends AppCompatActivity implements View.OnC
         findViewById(R.id.tv_two).setOnClickListener(this);
         findViewById(R.id.tv_three).setOnClickListener(this);
         findViewById(R.id.tv_four).setOnClickListener(this);
+        findViewById(R.id.tv_five).setOnClickListener(this);
     }
 
     @Override
@@ -48,6 +49,11 @@ public class ReverseLinkedActivity extends AppCompatActivity implements View.OnC
             case R.id.tv_four:
 //                showNode("删除倒数N节点结果:", deleteNodeOfIndex(6, buildNode(arr3)));
                 showNode("删除倒数N节点结果:", deleteNodeOfIndex_Two(buildNode(arr3), 5));
+                break;
+            case R.id.tv_five:
+//                showNode("删除倒数N节点结果:", deleteNodeOfIndex(6, buildNode(arr3)));
+//                showNode("合并两个有序链表结果:", mergeNode(buildNode(arr3), buildNode(arr4)));
+                showNode("合并两个有序链表结果:", mergeTwoNode(buildNode(arr3), buildNode(arr4)));
                 break;
             default:
                 break;
@@ -75,6 +81,7 @@ public class ReverseLinkedActivity extends AppCompatActivity implements View.OnC
     int[] arr = {2, 5, 3, 4, 1, 0};
     int[] arr2 = {2, 1, 2, 3, 0, 7};
     int[] arr3 = {1, 2, 3, 4, 5, 6};
+    int[] arr4 = {1, 3, 4, 6, 8, 10};
 
     /**
      * 构建链表
@@ -362,5 +369,55 @@ public class ReverseLinkedActivity extends AppCompatActivity implements View.OnC
         }
         second.next = second.next.next;
         return dummy.next;
+    }
+
+    /**
+     * 21 合并两个有序链表
+     * 将两个升序链表合并为一个新的升序链表并返回   新链表是通过拼接给定的两个链表的所有节点组成的
+     * 例如 1->2->4   1->3->4
+     * 1->1->2->3->4->4
+     * 迭代解法   时间复杂度O(N+M)  空间复杂度 0（1）
+     */
+    private Node mergeNode(Node head1, Node head2) {
+        // 结果 哑节点
+        Node dummy = new Node(-1);
+        Node resultHead = dummy;
+        while (head1 != null && head2 != null) {
+            // 当前节点对比   小的节点向前 移一位
+            if (head1.data < head2.data) {
+                // 指向最小的
+                resultHead.next = head1;
+                head1 = head1.next;
+            } else {
+                // 指向最小的
+                resultHead.next = head2;
+                head2 = head2.next;
+            }
+            // resultHead   和 小节点向后移一位
+            resultHead = resultHead.next;
+        }
+        // 直到有一个链表为空   next 指向剩下那个链表节点
+        resultHead.next = head1 != null ? head1 : head2;
+        return dummy.next;
+    }
+
+    /**
+     *  合并2个有序链表  递归解法
+     * @param nodeOne
+     * @param nodeTwo
+     * @return
+     */
+    public Node mergeTwoNode(Node nodeOne, Node nodeTwo) {
+        if (nodeOne == null) {
+            return nodeTwo;
+        } else if (nodeTwo == null) {
+            return nodeOne;
+        } else if (nodeOne.data < nodeTwo.data) {
+            nodeOne.next = mergeTwoNode(nodeOne.next, nodeTwo);
+            return nodeOne;
+        } else {
+            nodeTwo.next = mergeTwoNode(nodeOne, nodeTwo.next);
+            return nodeTwo;
+        }
     }
 }
